@@ -2,8 +2,8 @@
 import os
 from pathlib import Path
 
+import streamlit as st
 from dotenv import load_dotenv
-
 
 # ============================================================
 # 1. BASE DIRECTORY
@@ -19,11 +19,8 @@ load_dotenv(BASE_DIR / ".env")
 # ============================================================
 
 APP_NAME = "KhetMitra AI"
-
 APP_VERSION = "1.0.0"
-
 APP_TAGLINE = "AI-powered wheat farming decision support system"
-
 DEFAULT_REGION = "Haryana"
 
 
@@ -31,7 +28,13 @@ DEFAULT_REGION = "Haryana"
 # 3. GROQ / LLM SETTINGS
 # ============================================================
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+# Read from Streamlit Cloud Secrets first, then local .env
+try:
+    GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
+except Exception:
+    GROQ_API_KEY = None
+
+GROQ_API_KEY = GROQ_API_KEY or os.getenv("GROQ_API_KEY")
 
 GROQ_MODEL = os.getenv(
     "GROQ_MODEL",
@@ -54,9 +57,7 @@ RAG_INDEX_DIR = (
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 CHUNK_SIZE = 800
-
 CHUNK_OVERLAP = 150
-
 RETRIEVAL_K = 4
 
 
@@ -86,7 +87,6 @@ WHEAT_YIELD_MODEL_PATH = (
     MODEL_DIR / "wheat_yield_xgboost.joblib"
 )
 
-# Backward compatibility with existing modules
 YIELD_MODEL_PATH = WHEAT_YIELD_MODEL_PATH
 
 
@@ -95,7 +95,6 @@ YIELD_MODEL_PATH = WHEAT_YIELD_MODEL_PATH
 # ============================================================
 
 DATA_DIR = BASE_DIR / "data"
-
 RAW_DATA_DIR = DATA_DIR / "raw"
 
 
@@ -119,7 +118,7 @@ for directory in DIRECTORIES:
 # ============================================================
 
 if not GROQ_API_KEY:
-    print("WARNING: GROQ_API_KEY is not configured in .env")
+    print("WARNING: GROQ_API_KEY is not configured.")
 
 if not KNOWLEDGE_BASE_DIR.exists():
     print("WARNING: Wheat knowledge base directory not found.")
